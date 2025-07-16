@@ -24,3 +24,6 @@ pip install -r requirements.txt
 
 3. Run the app:
 streamlit run app.py
+
+### Download Model
+Download the trained model here: https://drive.google.com/file/d/1_wuqPXAJ9zJncGYfoNFqA4iR1kpU0b3J/view?usp=share_link
