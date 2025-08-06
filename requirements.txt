@@ -4,5 +4,4 @@ numpy
 scikit-learn
 matplotlib
 joblib
-torch
-
+torch==2.0.1
