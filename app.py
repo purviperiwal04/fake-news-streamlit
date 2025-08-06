@@ -1,41 +1,38 @@
-# rebuild streamlit
-import streamlit as st
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
+from IPython.display import display, Markdown
 
-# ✅ Load model and tokenizer
-MODEL_PATH = "model"  # Your saved model folder
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+# ✅ Use public Hugging Face model (no need to upload anything)
+MODEL_PATH = "mrm8488/bert-tiny-finetuned-fake-news-detection"
 
-@st.cache_resource
-def load_model():
-    tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
-    model = BertForSequenceClassification.from_pretrained(MODEL_PATH, local_files_only=True)
-    model.to(device)  # ✅ Load on CPU/MPS properly
-    return tokenizer, model
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-tokenizer, model = load_model()
+# ✅ Load model from Hugging Face
+tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
+model.to(device)
+model.eval()
 
-st.title("📰 Fake News Detection App")
-st.write("Enter a news article headline or text to check if it's **Fake** or **True**.")
+def predict_fake_news(text):
+    if not text.strip():
+        display(Markdown("⚠️ *Please enter valid text.*"))
+        return
+    
+    # ✅ Preprocess
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    
+    # ✅ Predict
+    with torch.no_grad():
+        outputs = model(**inputs)
+        probs = torch.softmax(outputs.logits, dim=1)
+        prediction = torch.argmax(probs, dim=1).item()
+        confidence = torch.max(probs).item() * 100
 
-user_input = st.text_area("Enter your news text here:")
+    label = "✅ *True News" if prediction == 1 else "❌ **Fake News*"
+    display(Markdown(f"### Prediction: {label}"))
+    display(Markdown(f"*Confidence:* ⁠ {confidence:.2f}% ⁠"))
 
-if st.button("Predict"):
-    if user_input.strip():
-        # ✅ Preprocess input
-        inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True, max_length=512)
-        inputs = {key: val.to(device) for key, val in inputs.items()}
-
-        # ✅ Prediction
-        with torch.no_grad():
-            outputs = model(**inputs)
-            probs = torch.softmax(outputs.logits, dim=1)
-            prediction = torch.argmax(probs, dim=1).item()
-            confidence = torch.max(probs).item() * 100
-
-        label = "✅ True News" if prediction == 1 else "❌ Fake News"
-        st.subheader(f"Prediction: {label}")
-        st.write(f"Confidence: {confidence:.2f}%")
-    else:
-        st.warning("Please enter some text to predict.")
+# Run
+sample_text = input("Enter a news article or headline: ")
+predict_fake_news(sample_text)
