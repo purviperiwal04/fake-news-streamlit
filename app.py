@@ -1,4 +1,4 @@
-# force rebuild
+# rebuild streamlit
 import streamlit as st
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
