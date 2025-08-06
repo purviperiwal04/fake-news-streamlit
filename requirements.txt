@@ -5,3 +5,4 @@ scikit-learn
 matplotlib
 joblib
 torch==2.0.1
+transformers==4.35.2
