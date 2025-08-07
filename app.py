@@ -15,7 +15,7 @@ model.eval()
 
 def predict_fake_news(text):
     if not text.strip():
-        display(Markdown("⚠️ *Please enter valid text.*"))
+        display(Markdown("⚠️ Please enter valid text."))
         return
     
     # ✅ Preprocess
@@ -29,9 +29,9 @@ def predict_fake_news(text):
         prediction = torch.argmax(probs, dim=1).item()
         confidence = torch.max(probs).item() * 100
 
-    label = "✅ *True News" if prediction == 1 else "❌ **Fake News*"
+    label = "✅ True News" if prediction == 1 else "❌ **Fake News"
     display(Markdown(f"### Prediction: {label}"))
-    display(Markdown(f"*Confidence:* ⁠ {confidence:.2f}% ⁠"))
+    display(Markdown(f"Confidence: ⁠ {confidence:.2f}% ⁠"))
 
 # Run
 sample_text = input("Enter a news article or headline: ")
